@@ -13,6 +13,9 @@ COPY package*.json ./
 # Instalar dependencias (se necesitan todas para el build)
 RUN npm install --silent
 
+# Instalar TypeScript explícitamente para el build (next.config.ts)
+RUN npm install --save-dev --silent typescript
+
 # Copiar código fuente
 COPY . .
 
