@@ -1,6 +1,9 @@
 # Dockerfile para Next.js con SQLite
 FROM node:20-alpine AS base
 
+# Instalar dependencias de sistema para compilar módulos nativos
+RUN apk add --no-cache python3 make g++ pkgconfig cairo-dev pango-dev jpeg-dev giflib-dev librsvg-dev
+
 # Establecer el directorio de trabajo
 WORKDIR /app
 
@@ -8,7 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalar dependencias (se necesitan todas para el build)
-RUN npm ci --silent
+RUN npm install --silent
 
 # Copiar código fuente
 COPY . .
