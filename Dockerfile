@@ -16,11 +16,11 @@ RUN npm install --silent
 # Copiar código fuente
 COPY . .
 
+# Configurar directorio de datos (antes del build para que la DB funcione)
+RUN mkdir -p /app/data
+
 # Construir la aplicación
 RUN npm run build
-
-# Configurar directorio de datos
-RUN mkdir -p /app/data
 
 # Variables de entorno para producción
 ENV NODE_ENV=production
