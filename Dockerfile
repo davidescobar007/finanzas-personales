@@ -10,11 +10,8 @@ WORKDIR /app
 # Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instalar dependencias (se necesitan todas para el build)
-RUN npm install --silent
-
-# Instalar TypeScript explícitamente para el build (next.config.ts)
-RUN npm install --save-dev --silent typescript
+# Instalar dependencias (se necesitan todas para el build, incluyendo devDependencies)
+RUN NODE_ENV=development npm install --silent
 
 # Copiar código fuente
 COPY . .
