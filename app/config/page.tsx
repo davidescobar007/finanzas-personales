@@ -10,7 +10,7 @@ import { TransactionTypeCard } from "@/components/transaction-type-card";
 import { TransactionTypeForm } from "@/components/transaction-type-form";
 import { CurrencySelector } from "@/components/currency-selector";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Download, Upload, AlertTriangle } from "lucide-react";
 
 export default function ConfigPage() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
@@ -22,6 +22,9 @@ export default function ConfigPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCategoryFormOpen, setIsCategoryFormOpen] = useState(false);
   const [isTransactionTypeFormOpen, setIsTransactionTypeFormOpen] = useState(false);
+  const [importMode, setImportMode] = useState<"replace" | "append">("append");
+  const [importResult, setImportResult] = useState<any>(null);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     fetchPaymentMethods();
@@ -195,6 +198,60 @@ export default function ConfigPage() {
     }
   };
 
+  const handleExportData = async () => {
+    try {
+      const response = await fetch("/api/export");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `finanzas-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      alert("Error al exportar datos");
+    }
+  };
+
+  const handleImportData = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    setImportResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("mode", importMode);
+
+      const response = await fetch("/api/import", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setImportResult(result);
+        fetchPaymentMethods();
+        fetchCategories();
+        fetchTransactionTypes();
+      } else {
+        alert(result.error || "Error al importar datos");
+      }
+    } catch (error) {
+      console.error("Error importing data:", error);
+      alert("Error al importar datos");
+    } finally {
+      setIsImporting(false);
+      event.target.value = "";
+    }
+  };
+
   return (
     <div>
       <div className="mb-8">
@@ -213,17 +270,111 @@ export default function ConfigPage() {
       <div className="space-y-8">
         <div>
           <h3 className="text-xl font-bold text-gray-900 mb-4">
-            General
+            Importar/Exportar Datos
           </h3>
-          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-            <div className="max-w-md">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Moneda principal
-              </label>
-              <CurrencySelector onChange={handleCurrencyChange} />
-              <p className="text-sm text-gray-500 mt-2">
-                Esta moneda se utilizará para mostrar todos los montos en la aplicación
-              </p>
+          <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-semibold text-gray-900">Exportar todos los datos</h4>
+                <p className="text-sm text-gray-500">Descarga un respaldo completo de tus datos</p>
+              </div>
+              <Button onClick={handleExportData}>
+                <Download className="h-5 w-5 mr-2" />
+                Exportar
+              </Button>
+            </div>
+
+            <div className="border-t border-gray-200 pt-4">
+              <h4 className="font-semibold text-gray-900 mb-3">Importar datos</h4>
+              
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Modo de importación:
+                  </label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setImportMode("append")}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        importMode === "append"
+                          ? "bg-indigo-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      Agregar a existentes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImportMode("replace")}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        importMode === "replace"
+                          ? "bg-red-600 text-white"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      Reemplazar todo
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <input
+                    type="file"
+                    accept=".json"
+                    onChange={handleImportData}
+                    disabled={isImporting}
+                    className="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-full file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-indigo-50 file:text-indigo-700
+                      hover:file:bg-indigo-100
+                      disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <Button onClick={() => document.querySelector('input[type="file"]')?.click()} disabled={isImporting}>
+                    <Upload className="h-5 w-5 mr-2" />
+                    {isImporting ? "Importando..." : "Seleccionar archivo"}
+                  </Button>
+                </div>
+
+                {importResult && (
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h5 className="font-semibold text-gray-900 mb-2">{importResult.message}</h5>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-green-600 font-medium">✓ Importados:</span>
+                        <ul className="mt-1 space-y-1 text-gray-600">
+                          {Object.entries(importResult.results.imported).map(([key, value]) => (
+                            value > 0 && <li key={key}>{key}: {value}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <span className="text-yellow-600 font-medium">⚠ Omitidos:</span>
+                        <ul className="mt-1 space-y-1 text-gray-600">
+                          {Object.entries(importResult.results.skipped).map(([key, value]) => (
+                            value > 0 && <li key={key}>{key}: {value}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                    {importResult.results.errors.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <span className="text-red-600 font-medium flex items-center gap-1">
+                          <AlertTriangle className="h-4 w-4" />
+                          Errores:
+                        </span>
+                        <ul className="mt-2 space-y-1 text-sm text-gray-600 max-h-40 overflow-y-auto">
+                          {importResult.results.errors.map((error: string, index: number) => (
+                            <li key={index} className="text-red-600">{error}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
