@@ -205,7 +205,7 @@ export default function ConfigPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `finanzas-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `finanzas-backup-${new Date().toISOString().split('T')[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -321,7 +321,7 @@ export default function ConfigPage() {
                 <div className="flex items-center gap-4">
                   <input
                     type="file"
-                    accept=".json"
+                    accept=".csv"
                     onChange={handleImportData}
                     disabled={isImporting}
                     className="block w-full text-sm text-gray-500
