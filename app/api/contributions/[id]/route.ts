@@ -7,7 +7,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    contributionQueries.delete.run(id);
+    contributionQueries.delete().run(id);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Error al eliminar aporte" }, { status: 500 });

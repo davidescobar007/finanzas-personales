@@ -3,7 +3,7 @@ import { categoryQueries } from "@/lib/db";
 
 export async function GET() {
   try {
-    const categories = categoryQueries.getAll.all();
+    const categories = categoryQueries.getAll().all();
     return NextResponse.json(categories);
   } catch (error) {
     console.error("Error fetching categories:", error);
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const result = categoryQueries.create.run(name, icon, color);
-    const category = categoryQueries.getById.get(result.lastInsertRowid as number);
+    const result = categoryQueries.create().run(name, icon, color);
+    const category = categoryQueries.getById().get(result.lastInsertRowid as number);
 
     return NextResponse.json(category, { status: 201 });
   } catch (error: any) {

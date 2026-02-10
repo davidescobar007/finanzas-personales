@@ -9,19 +9,19 @@ export async function PUT(
     const { id } = await params;
     const body = await request.json();
     
-    const existingMethod = paymentMethodQueries.getById.get(id) as { name: string } | undefined;
+    const existingMethod = paymentMethodQueries.getById().get(id) as { name: string } | undefined;
     if (!existingMethod) {
       return NextResponse.json({ error: "Método de pago no encontrado" }, { status: 404 });
     }
 
-    paymentMethodQueries.update.run(
+    paymentMethodQueries.update().run(
       body.name,
       body.icon,
       body.color,
       id
     );
     
-    const updatedMethod = paymentMethodQueries.getById.get(id);
+    const updatedMethod = paymentMethodQueries.getById().get(id);
     return NextResponse.json(updatedMethod);
   } catch (error) {
     console.error("Error al actualizar método de pago:", error);
@@ -35,12 +35,12 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const existingMethod = paymentMethodQueries.getById.get(id) as { name: string } | undefined;
+    const existingMethod = paymentMethodQueries.getById().get(id) as { name: string } | undefined;
     if (!existingMethod) {
       return NextResponse.json({ error: "Método de pago no encontrado" }, { status: 404 });
     }
 
-    const usage = paymentMethodQueries.checkUsage.get(existingMethod.name) as { count: number };
+    const usage = paymentMethodQueries.checkUsage().get(existingMethod.name) as { count: number };
     
     if (usage.count > 0) {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function DELETE(
       );
     }
 
-    paymentMethodQueries.delete.run(id);
+    paymentMethodQueries.delete().run(id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error al eliminar método de pago:", error);

@@ -3,7 +3,7 @@ import { transactionTypeQueries } from "@/lib/db";
 
 export async function GET() {
   try {
-    const transactionTypes = transactionTypeQueries.getAll.all();
+    const transactionTypes = transactionTypeQueries.getAll().all();
     return NextResponse.json(transactionTypes);
   } catch (error) {
     console.error("Error fetching transaction types:", error);
@@ -19,8 +19,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const result = transactionTypeQueries.create.run(name, icon, color, classification || 'expense');
-    const transactionType = transactionTypeQueries.getById.get(result.lastInsertRowid as number);
+    const result = transactionTypeQueries.create().run(name, icon, color, classification || 'expense');
+    const transactionType = transactionTypeQueries.getById().get(result.lastInsertRowid as number);
 
     return NextResponse.json(transactionType, { status: 201 });
   } catch (error: any) {

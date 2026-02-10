@@ -332,7 +332,7 @@ export default function ConfigPage() {
                       hover:file:bg-indigo-100
                       disabled:opacity-50 disabled:cursor-not-allowed"
                   />
-                  <Button onClick={() => document.querySelector('input[type="file"]')?.click()} disabled={isImporting}>
+                  <Button onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()} disabled={isImporting}>
                     <Upload className="h-5 w-5 mr-2" />
                     {isImporting ? "Importando..." : "Seleccionar archivo"}
                   </Button>
@@ -346,7 +346,7 @@ export default function ConfigPage() {
                         <span className="text-green-600 font-medium">✓ Importados:</span>
                         <ul className="mt-1 space-y-1 text-gray-600">
                           {Object.entries(importResult.results.imported).map(([key, value]) => (
-                            value > 0 && <li key={key}>{key}: {value}</li>
+                            (value as number) > 0 && <li key={key}>{key}: {value as number}</li>
                           ))}
                         </ul>
                       </div>
@@ -354,7 +354,7 @@ export default function ConfigPage() {
                         <span className="text-yellow-600 font-medium">⚠ Omitidos:</span>
                         <ul className="mt-1 space-y-1 text-gray-600">
                           {Object.entries(importResult.results.skipped).map(([key, value]) => (
-                            value > 0 && <li key={key}>{key}: {value}</li>
+                            (value as number) > 0 && <li key={key}>{key}: {value as number}</li>
                           ))}
                         </ul>
                       </div>

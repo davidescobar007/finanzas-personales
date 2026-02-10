@@ -3,9 +3,9 @@ import { fundQueries, contributionQueries } from "@/lib/db";
 
 export async function GET() {
   try {
-    const funds = fundQueries.getAll.all();
+    const funds = fundQueries.getAll().all();
     const fundsWithProgress = funds.map((fund: any) => {
-      const totalContributions = contributionQueries.getTotalByFund.get(fund.id) as { total: number } | undefined;
+      const totalContributions = contributionQueries.getTotalByFund().get(fund.id) as { total: number } | undefined;
       const total = totalContributions?.total || 0;
       return {
         ...fund,
@@ -22,7 +22,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = fundQueries.create.run(
+    const result = fundQueries.create().run(
       body.name,
       body.targetAmount,
       0,
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       body.color,
       body.deadline || null
     );
-    const fund = fundQueries.getById.get(result.lastInsertRowid);
+    const fund = fundQueries.getById().get(result.lastInsertRowid);
     return NextResponse.json({ ...(fund || {}), progress: 0 }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Error al crear fondo" }, { status: 500 });

@@ -7,9 +7,9 @@ export async function GET(request: NextRequest) {
     const month = searchParams.get("month") || new Date().toISOString().slice(0, 7);
     const previousMonth = searchParams.get("previousMonth");
 
-    const expenses = expenseQueries.getByMonth.all(month);
-    const allExpenses = expenseQueries.getAll.all();
-    const transactionTypes = transactionTypeQueries.getAll.all();
+    const expenses = expenseQueries.getByMonth().all(month);
+    const allExpenses = expenseQueries.getAll().all();
+    const transactionTypes = transactionTypeQueries.getAll().all();
 
     const expenseTypes = transactionTypes
       .filter((t: any) => t.classification === 'expense')
@@ -43,24 +43,24 @@ export async function GET(request: NextRequest) {
       count: allExpenses.length,
     };
 
-    const summary = expenseQueries.getSummary.all(month);
-    const paymentSummary = expenseQueries.getByPaymentMethod.all(month);
-    const typeSummary = expenseQueries.getTypeSummary.all(month);
+    const summary = expenseQueries.getSummary().all(month);
+    const paymentSummary = expenseQueries.getByPaymentMethod().all(month);
+    const typeSummary = expenseQueries.getTypeSummary().all(month);
 
-    const categories = categoryQueries.getAll.all();
-    const paymentMethods = paymentMethodQueries.getAll.all();
+    const categories = categoryQueries.getAll().all();
+    const paymentMethods = paymentMethodQueries.getAll().all();
 
     const previousKpis = previousMonth ? {
-      totalExpenses: expenseQueries.getByMonth.all(previousMonth)
+      totalExpenses: expenseQueries.getByMonth().all(previousMonth)
         .filter((e: any) => expenseTypes.includes(e.type))
         .reduce((sum: number, e: any) => sum + e.amount, 0),
-      totalSavings: expenseQueries.getByMonth.all(previousMonth)
+      totalSavings: expenseQueries.getByMonth().all(previousMonth)
         .filter((e: any) => savingsTypes.includes(e.type))
         .reduce((sum: number, e: any) => sum + e.amount, 0),
-      totalInvestments: expenseQueries.getByMonth.all(previousMonth)
+      totalInvestments: expenseQueries.getByMonth().all(previousMonth)
         .filter((e: any) => investmentTypes.includes(e.type))
         .reduce((sum: number, e: any) => sum + e.amount, 0),
-      totalToTransfer: expenseQueries.getByMonth.all(previousMonth)
+      totalToTransfer: expenseQueries.getByMonth().all(previousMonth)
         .filter((e: any) => transferTypes.includes(e.type))
         .reduce((sum: number, e: any) => sum + e.amount, 0),
     } : undefined;
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
       for (let i = 5; i >= 0; i--) {
         const d = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
         const monthKey = d.toISOString().slice(0, 7);
-        const monthlyExpenses = expenseQueries.getByMonth.all(monthKey);
+        const monthlyExpenses = expenseQueries.getByMonth().all(monthKey);
         
         trend.push({
           month: monthKey,

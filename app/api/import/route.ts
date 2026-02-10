@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Database } from "better-sqlite3";
+import Database from "better-sqlite3";
 import path from "path";
+import { mkdirSync, existsSync } from "fs";
 
 function parseCSV(csv: string, headers: string[]): any[] {
   const lines = csv.trim().split("\n");
@@ -28,15 +29,14 @@ function parseCSV(csv: string, headers: string[]): any[] {
 
     const obj: any = {};
     headers.forEach((header, index) => {
-      let value = values[index] || "";
-      if (value === "") value = null;
-
+      const rawValue = values[index] || "";
+      
       if (header === "amount" || header === "targetAmount" || header === "currentAmount") {
-        obj[header] = value ? parseFloat(value) : null;
+        obj[header] = rawValue ? parseFloat(rawValue) : null;
       } else if (header === "id" || header === "fundId") {
-        obj[header] = value ? parseInt(value) : null;
+        obj[header] = rawValue ? parseInt(rawValue) : null;
       } else {
-        obj[header] = value;
+        obj[header] = rawValue || null;
       }
     });
 
@@ -73,7 +73,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const dbPath = path.join("/app/data", "finanzas.db");
+    const dataDir = "/app/data";
+    const dbPath = path.join(dataDir, "finanzas.db");
+    
+    if (!existsSync(dataDir)) {
+      mkdirSync(dataDir, { recursive: true });
+    }
+    
     const db = new Database(dbPath);
     db.pragma("journal_mode = WAL");
 
@@ -119,16 +125,16 @@ export async function POST(request: NextRequest) {
         const categories = parseCSV(sections["CATEGORIAS"], ["id", "name", "icon", "color"]);
         for (const category of categories) {
           try {
-            const existing = checkCategory.get(category.name);
+            const existing = checkCategory.get(category.name) as { id: number } | undefined;
             if (existing && mode === "append") {
-              categoryMap.set(category.id, existing.id);
+              categoryMap.set(category.id as number, existing.id);
               results.skipped.categories++;
               continue;
             }
 
             const result = insertCategory.run(category.name, category.icon, category.color);
             const newId = Number(result.lastInsertRowid);
-            categoryMap.set(category.id, newId);
+            categoryMap.set(category.id as number, newId);
             results.imported.categories++;
           } catch (error) {
             results.errors.push(`Error importando categoría ${category.name}: ${error}`);
@@ -140,16 +146,16 @@ export async function POST(request: NextRequest) {
         const paymentMethods = parseCSV(sections["METODOS_DE_PAGO"], ["id", "name", "icon", "color"]);
         for (const paymentMethod of paymentMethods) {
           try {
-            const existing = checkPaymentMethod.get(paymentMethod.name);
+            const existing = checkPaymentMethod.get(paymentMethod.name) as { id: number } | undefined;
             if (existing && mode === "append") {
-              paymentMethodMap.set(paymentMethod.id, existing.id);
+              paymentMethodMap.set(paymentMethod.id as number, existing.id);
               results.skipped.paymentMethods++;
               continue;
             }
 
             const result = insertPaymentMethod.run(paymentMethod.name, paymentMethod.icon, paymentMethod.color);
             const newId = Number(result.lastInsertRowid);
-            paymentMethodMap.set(paymentMethod.id, newId);
+            paymentMethodMap.set(paymentMethod.id as number, newId);
             results.imported.paymentMethods++;
           } catch (error) {
             results.errors.push(`Error importando método de pago ${paymentMethod.name}: ${error}`);
@@ -161,9 +167,9 @@ export async function POST(request: NextRequest) {
         const transactionTypes = parseCSV(sections["TIPOS_DE_TRANSACCION"], ["id", "name", "icon", "color", "classification"]);
         for (const transactionType of transactionTypes) {
           try {
-            const existing = checkTransactionType.get(transactionType.name);
+            const existing = checkTransactionType.get(transactionType.name) as { id: number } | undefined;
             if (existing && mode === "append") {
-              transactionTypeMap.set(transactionType.id, existing.id);
+              transactionTypeMap.set(transactionType.id as number, existing.id);
               results.skipped.transactionTypes++;
               continue;
             }
@@ -175,7 +181,7 @@ export async function POST(request: NextRequest) {
               transactionType.classification || "expense"
             );
             const newId = Number(result.lastInsertRowid);
-            transactionTypeMap.set(transactionType.id, newId);
+            transactionTypeMap.set(transactionType.id as number, newId);
             results.imported.transactionTypes++;
           } catch (error) {
             results.errors.push(`Error importando tipo de transacción ${transactionType.name}: ${error}`);
@@ -187,9 +193,9 @@ export async function POST(request: NextRequest) {
         const funds = parseCSV(sections["FONDOS"], ["id", "name", "targetAmount", "currentAmount", "icon", "color", "deadline", "createdAt"]);
         for (const fund of funds) {
           try {
-            const existing = checkFund.get(fund.name);
+            const existing = checkFund.get(fund.name) as { id: number } | undefined;
             if (existing && mode === "append") {
-              fundMap.set(fund.id, existing.id);
+              fundMap.set(fund.id as number, existing.id);
               results.skipped.funds++;
               continue;
             }
@@ -204,7 +210,7 @@ export async function POST(request: NextRequest) {
               fund.createdAt || new Date().toISOString()
             );
             const newId = Number(result.lastInsertRowid);
-            fundMap.set(fund.id, newId);
+            fundMap.set(fund.id as number, newId);
             results.imported.funds++;
           } catch (error) {
             results.errors.push(`Error importando fondo ${fund.name}: ${error}`);

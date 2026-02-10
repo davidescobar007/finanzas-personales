@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    expenseQueries.update.run(
+    expenseQueries.update().run(
       body.title,
       body.amount,
       body.category,
@@ -19,7 +19,7 @@ export async function PUT(
       body.fundId || null,
       id
     );
-    const expense = expenseQueries.getById.get(id);
+    const expense = expenseQueries.getById().get(id);
     return NextResponse.json(expense);
   } catch (error) {
     return NextResponse.json({ error: "Error al actualizar gasto" }, { status: 500 });
@@ -32,7 +32,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    expenseQueries.delete.run(id);
+    expenseQueries.delete().run(id);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: "Error al eliminar gasto" }, { status: 500 });

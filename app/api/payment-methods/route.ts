@@ -3,7 +3,7 @@ import { paymentMethodQueries } from "@/lib/db";
 
 export async function GET() {
   try {
-    const methods = paymentMethodQueries.getAll.all();
+    const methods = paymentMethodQueries.getAll().all();
     return NextResponse.json(methods);
   } catch (error) {
     return NextResponse.json({ error: "Error al obtener métodos de pago" }, { status: 500 });
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingMethods = paymentMethodQueries.getAll.all() as { name: string }[];
+    const existingMethods = paymentMethodQueries.getAll().all() as { name: string }[];
     const nameExists = existingMethods.some((m) => m.name.toLowerCase() === body.name.toLowerCase());
     
     if (nameExists) {
@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = paymentMethodQueries.create.run(body.name, body.icon, body.color);
-    const newMethod = paymentMethodQueries.getById.get(result.lastInsertRowid);
+    const result = paymentMethodQueries.create().run(body.name, body.icon, body.color);
+    const newMethod = paymentMethodQueries.getById().get(result.lastInsertRowid);
     
     return NextResponse.json(newMethod, { status: 201 });
   } catch (error) {

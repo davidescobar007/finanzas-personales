@@ -22,12 +22,12 @@ function convertToCSV(data: any[], headers: string[]): string {
 
 export async function GET() {
   try {
-    const expenses = expenseQueries.getAll.all() as any[];
-    const categories = categoryQueries.getAll.all() as any[];
-    const paymentMethods = paymentMethodQueries.getAll.all() as any[];
-    const funds = fundQueries.getAll.all() as any[];
-    const contributions = contributionQueries.getAll.all() as any[];
-    const transactionTypes = transactionTypeQueries.getAll.all() as any[];
+    const expenses = expenseQueries.getAll().all() as any[];
+    const categories = categoryQueries.getAll().all() as any[];
+    const paymentMethods = paymentMethodQueries.getAll().all() as any[];
+    const funds = fundQueries.getAll().all() as any[];
+    const contributions = contributionQueries.getAll().all() as any[];
+    const transactionTypes = transactionTypeQueries.getAll().all() as any[];
 
     const expensesCSV = convertToCSV(expenses, [
       "id", "title", "amount", "category", "date", "notes", 

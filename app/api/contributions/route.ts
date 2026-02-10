@@ -8,13 +8,13 @@ export async function GET(request: NextRequest) {
 
     let contributions;
     if (month) {
-      contributions = contributionQueries.getByMonth.all(month);
+      contributions = contributionQueries.getByMonth().all(month);
     } else {
-      contributions = contributionQueries.getAll.all();
+      contributions = contributionQueries.getAll().all();
     }
 
     const contributionsWithFund = contributions.map((c: any) => {
-      const fund = fundQueries.getById.get(c.fundId) as Fund | undefined;
+      const fund = fundQueries.getById().get(c.fundId) as Fund | undefined;
       return {
         ...c,
         fundName: fund?.name,
@@ -32,15 +32,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = contributionQueries.create.run(
+    const result = contributionQueries.create().run(
       body.fundId,
       body.amount,
       body.date,
       body.notes || ""
     );
 
-    const contribution = contributionQueries.getById.get(result.lastInsertRowid);
-    const fund = fundQueries.getById.get(body.fundId) as Fund | undefined;
+    const contribution = contributionQueries.getById().get(result.lastInsertRowid);
+    const fund = fundQueries.getById().get(body.fundId) as Fund | undefined;
 
     return NextResponse.json({
       ...(contribution || {}),

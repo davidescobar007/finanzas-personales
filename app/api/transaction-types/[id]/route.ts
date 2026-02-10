@@ -7,7 +7,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const transactionType = transactionTypeQueries.getById.get(parseInt(id));
+    const transactionType = transactionTypeQueries.getById().get(parseInt(id));
     if (!transactionType) {
       return NextResponse.json({ error: "Transaction type not found" }, { status: 404 });
     }
@@ -30,12 +30,12 @@ export async function PUT(
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const result = transactionTypeQueries.update.run(name, icon, color, classification || 'expense', parseInt(id));
+    const result = transactionTypeQueries.update().run(name, icon, color, classification || 'expense', parseInt(id));
     if (result.changes === 0) {
       return NextResponse.json({ error: "Transaction type not found" }, { status: 404 });
     }
 
-    const transactionType = transactionTypeQueries.getById.get(parseInt(id));
+    const transactionType = transactionTypeQueries.getById().get(parseInt(id));
     return NextResponse.json(transactionType);
   } catch (error: any) {
     console.error("Error updating transaction type:", error);
@@ -52,7 +52,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const usageCheck = transactionTypeQueries.checkUsage.get(id) as { count: number };
+    const usageCheck = transactionTypeQueries.checkUsage().get(id) as { count: number };
     if (usageCheck.count > 0) {
       return NextResponse.json(
         { error: "Cannot delete transaction type with existing transactions" },
@@ -60,7 +60,7 @@ export async function DELETE(
       );
     }
 
-    const result = transactionTypeQueries.delete.run(parseInt(id));
+    const result = transactionTypeQueries.delete().run(parseInt(id));
     if (result.changes === 0) {
       return NextResponse.json({ error: "Transaction type not found" }, { status: 404 });
     }

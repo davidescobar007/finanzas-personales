@@ -13,13 +13,13 @@ export async function PUT(
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const result = categoryQueries.update.run(name, icon, color, id);
+    const result = categoryQueries.update().run(name, icon, color, id);
 
     if (result.changes === 0) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
 
-    const category = categoryQueries.getById.get(Number(id));
+    const category = categoryQueries.getById().get(Number(id));
     return NextResponse.json(category);
   } catch (error: any) {
     console.error("Error updating category:", error);
@@ -37,12 +37,12 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const category = categoryQueries.getById.get(Number(id)) as Category | undefined;
+    const category = categoryQueries.getById().get(Number(id)) as Category | undefined;
     if (!category) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });
     }
 
-    const usage = categoryQueries.checkUsage.get(category.name) as { count: number };
+    const usage = categoryQueries.checkUsage().get(category.name) as { count: number };
     if (usage.count > 0) {
       return NextResponse.json(
         { error: "Cannot delete category with existing expenses" },
@@ -50,7 +50,7 @@ export async function DELETE(
       );
     }
 
-    const result = categoryQueries.delete.run(Number(id));
+    const result = categoryQueries.delete().run(Number(id));
 
     if (result.changes === 0) {
       return NextResponse.json({ error: "Category not found" }, { status: 404 });

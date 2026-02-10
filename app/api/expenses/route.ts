@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
     let expenses;
     if (month) {
-      expenses = expenseQueries.getByMonth.all(month);
+      expenses = expenseQueries.getByMonth().all(month);
       if (type) {
         expenses = expenses.filter((e: any) => e.type === type);
       }
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
         expenses = expenses.filter((e: any) => e.fundId === parseInt(fundId));
       }
     } else {
-      expenses = expenseQueries.getAll.all();
+      expenses = expenseQueries.getAll().all();
     }
 
     return NextResponse.json(expenses);
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const result = expenseQueries.create.run(
+    const result = expenseQueries.create().run(
       body.title,
       body.amount,
       body.category,
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       body.type || "Gasto",
       body.fundId || undefined
     );
-    const expense = expenseQueries.getById.get(result.lastInsertRowid);
+    const expense = expenseQueries.getById().get(result.lastInsertRowid);
     return NextResponse.json(expense, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: "Error al crear gasto" }, { status: 500 });
