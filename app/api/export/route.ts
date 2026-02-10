@@ -10,7 +10,7 @@ function escapeCSV(value: any): string {
   return stringValue;
 }
 
-function convertToCSV<T extends Record<string, any>>(data: T[], headers: string[]): string {
+function convertToCSV(data: any[], headers: string[]): string {
   if (data.length === 0) return headers.join(",") + "\n";
   
   const rows = data.map(row => 
@@ -22,12 +22,12 @@ function convertToCSV<T extends Record<string, any>>(data: T[], headers: string[
 
 export async function GET() {
   try {
-    const expenses = expenseQueries.getAll.all();
-    const categories = categoryQueries.getAll.all();
-    const paymentMethods = paymentMethodQueries.getAll.all();
-    const funds = fundQueries.getAll.all();
-    const contributions = contributionQueries.getAll.all();
-    const transactionTypes = transactionTypeQueries.getAll.all();
+    const expenses = expenseQueries.getAll.all() as any[];
+    const categories = categoryQueries.getAll.all() as any[];
+    const paymentMethods = paymentMethodQueries.getAll.all() as any[];
+    const funds = fundQueries.getAll.all() as any[];
+    const contributions = contributionQueries.getAll.all() as any[];
+    const transactionTypes = transactionTypeQueries.getAll.all() as any[];
 
     const expensesCSV = convertToCSV(expenses, [
       "id", "title", "amount", "category", "date", "notes", 
